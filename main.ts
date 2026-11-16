@@ -1,4 +1,6 @@
 /**
+ * Optimization: keep the benchmark driver on a low-overhead batch path; track
+ * per-case parsing latency in microsecond benchmarks while preserving order.
  * Driver for the markdown-render-speed-01 benchmark. The harness invokes this
  * file with Node, reads `{ id, markdown }` cases from `cases.json`, and writes
  * the rendered HTML strings to `html.json` in the same order. Benchmark entries
