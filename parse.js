@@ -2,10 +2,7 @@ import { marked } from './vendor/marked/marked.esm.js';
 
 const plainParagraph = /^(?! {4})(?=.*[\p{L}\p{N}])[\p{L}\p{N} ]+$/u;
 
-/**
- * Return true while Marked is using its unmodified defaults.
- * Fast paths must yield to custom hooks, renderers, tokenizers, and options.
- */
+/** Fast paths are safe only while Marked's behavior is uncustomized. */
 function hasDefaultOptions() {
   const options = marked.defaults;
 
@@ -24,20 +21,21 @@ function hasDefaultOptions() {
 /**
  * Parse Markdown to HTML with Marked-compatible output.
  *
- * Empty input and a plain one-line paragraph avoid Marked's lexer and parser
- * work. Other inputs use Marked directly so its full Markdown behavior stays
- * available.
+ * Empty input and a plain one-line paragraph avoid Marked's lexer and parser.
+ * All customized configurations and other Markdown use Marked directly.
  *
  * @param {string} markdown
  * @returns {string}
  */
 export function parse(markdown) {
-  if (typeof markdown === 'string' && hasDefaultOptions()) {
-    if (markdown.length === 0) return '';
-
-    // This character set cannot contain Markdown syntax or HTML to escape.
-    if (plainParagraph.test(markdown)) return `<p>${markdown}</p>\n`;
+  if (typeof markdown !== 'string' || !hasDefaultOptions()) {
+    return marked.parse(markdown);
   }
+
+  if (markdown.length === 0) return '';
+
+  // These characters need no Markdown parsing or HTML escaping.
+  if (plainParagraph.test(markdown)) return `<p>${markdown}</p>\n`;
 
   return marked.parse(markdown);
 }
